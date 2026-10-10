@@ -1,0 +1,20 @@
+name: playwright
+on: [push, pull_request]
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm install
+      - run: npx playwright install --with-deps ${{ matrix.browser }}
+      - run: npm test -- --project=${{ matrix.browser }}
+        env: { CI: 'true' }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: reporting-labs-${{ matrix.browser }}, path: reporting-labs/ }

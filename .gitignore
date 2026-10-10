@@ -1,0 +1,5 @@
+node_modules/
+test-results/
+playwright-report/
+/reporting-labs/
+/reporting-labs.history.json
