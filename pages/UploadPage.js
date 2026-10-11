@@ -23,6 +23,38 @@ class UploadPage extends BasePage {
     await this.pageHeading.waitFor({ timeout: 15_000 });
   }
 
+  /** @param {string} text */
+  async showSubtitle(text) {
+    await this.page.locator('html').waitFor({ state: 'attached' });
+    await this.page.evaluate((caption) => {
+      let subtitle = document.getElementById('playwright-video-subtitle');
+      if (!subtitle) {
+        subtitle = document.createElement('div');
+        subtitle.id = 'playwright-video-subtitle';
+        subtitle.setAttribute('role', 'status');
+        subtitle.setAttribute('aria-live', 'polite');
+        Object.assign(subtitle.style, {
+          position: 'fixed',
+          left: '0',
+          right: '0',
+          bottom: '0',
+          zIndex: '2147483647',
+          boxSizing: 'border-box',
+          padding: '12px 20px',
+          color: '#fff',
+          background: 'rgba(15, 23, 42, 0.94)',
+          font: '600 16px/1.4 Segoe UI, Arial, sans-serif',
+          textAlign: 'center',
+          pointerEvents: 'none',
+        });
+        const host = document.body || document.documentElement;
+        if (!host) throw new Error('Cannot display video subtitle before the page document is ready.');
+        host.appendChild(subtitle);
+      }
+      subtitle.textContent = caption;
+    }, text);
+  }
+
   /** @param {string} filePath */
   async selectFile(filePath) {
     await this.fileInput.setInputFiles(filePath);
@@ -34,10 +66,12 @@ class UploadPage extends BasePage {
 
   /** Clicks Upload and returns the POST response so tests can assert on status codes. */
   async submitAndWait() {
+    await this.showSubtitle('Submitting the selected file to the upload form.');
     const [response] = await Promise.all([
       this.page.waitForResponse((r) => r.url().endsWith(UploadPage.PATH) && r.request().method() === 'POST'),
       this.submit(),
     ]);
+    await this.showSubtitle(`Upload response received: HTTP ${response.status()}. Reviewing the result.`);
     return response;
   }
 

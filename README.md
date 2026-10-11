@@ -17,7 +17,8 @@ files; they do not generate or delete sample files during a run.
 │   ├── BasePage.js                     # Shared page navigation
 │   └── UploadPage.js                   # Upload locators and user actions
 ├── reporters/
-│   └── failure-classifier.js           # Additional failure classification output
+│   ├── failure-classifier.js           # Additional failure classification output
+│   └── video-archive.js                # Copies completed videos to local recordings/
 ├── test-cases/
 │   └── file-upload-test-cases.md       # 20 manual cases and execution fields
 ├── test-data/
@@ -27,7 +28,7 @@ files; they do not generate or delete sample files during a run.
 │       ├── high/                       # 1 MiB TXT, CSV, JSON, PDF, PNG
 │       └── edge/                       # Empty TXT and harmless .exe-named text file
 ├── tests/
-│   └── upload.spec.js                  # Automated upload test cases
+│   └── upload-scenarios.spec.js         # Automated upload scenarios
 ├── utils/
 │   └── sampleFiles.js                  # Safe resolver for checked-in test files
 ├── playwright.config.js                # Browser projects, timeouts, and reporters
@@ -40,6 +41,14 @@ Playwright writes test artifacts to `test-results/`. Reporting Labs writes its H
 and PDF reports to `reporting-labs/` and keeps trend history in
 `reporting-labs.history.json`. These generated files are ignored by Git. Videos are
 captured for test runs, screenshots on failure, and traces on first retry.
+
+Only Chromium test videos are captured. Captions describing the active test and current
+action are rendered into the recorded browser frames, and the video archive reporter
+transcodes recordings to 0.5x speed before saving them to the ignored local `recordings/`
+directory. Each recording starts with its test case ID and includes its retry attempt and
+timestamp in the filename. It stores only video files, not subtitle sidecars. Recordings remain in local
+storage and are not committed; `ffmpeg-static` supplies the transcoder across supported
+development and CI environments.
 
 ## How sample files are selected
 

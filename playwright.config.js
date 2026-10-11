@@ -17,6 +17,7 @@ module.exports = defineConfig({
   reporter: [
     ['list'],
      ['reporting-labs', reportingLabs],
+    ['./reporters/video-archive.js'],
     // ['html', { open: 'never' }],
     // ['json', { outputFile: 'test-results/results.json' }],
     // ['./reporters/failure-classifier.js'],
@@ -27,10 +28,10 @@ module.exports = defineConfig({
     navigationTimeout: 15_000,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
-    video: 'on',
+    video: 'off',
   },
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'chromium', use: { ...devices['Desktop Chrome'], video: 'on' } },
     { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
     { name: 'webkit', use: { ...devices['Desktop Safari'] } },
   ],

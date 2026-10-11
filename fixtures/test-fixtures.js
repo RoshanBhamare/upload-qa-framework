@@ -8,9 +8,10 @@ const { SampleFiles } = require('../utils/sampleFiles');
  * Add new page objects / services here and every spec gets them for free.
  */
 const test = base.test.extend({
-  uploadPage: async ({ page }, use) => {
+  uploadPage: async ({ page }, use, testInfo) => {
     const uploadPage = new UploadPage(page);
     await uploadPage.goto();
+    await uploadPage.showSubtitle(`${testInfo.title}. The upload page is ready.`);
     await use(uploadPage);
   },
   sampleFiles: async ({}, use) => {

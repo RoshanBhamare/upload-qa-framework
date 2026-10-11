@@ -77,6 +77,7 @@ test.describe('Requested upload scenarios', () => {
   test('TC-01: upload a single valid file', async ({ page, uploadPage, sampleFiles }) => {
     attachMeta('P1', 'major');
     const filePath = sampleFiles.get('low', 'valid-upload.txt');
+    await uploadPage.showSubtitle('TC-01: Selecting the sample text file.');
     await uploadPage.fileInput.setInputFiles({
       name: 'sample.txt',
       mimeType: 'text/plain',
@@ -84,6 +85,7 @@ test.describe('Requested upload scenarios', () => {
     });
 
     const response = await uploadPage.submitAndWait();
+    await uploadPage.showSubtitle('TC-01: Verifying the response, success heading, and exact filename.');
     expect(response.status()).toBeGreaterThanOrEqual(200);
     expect(response.status()).toBeLessThan(300);
     await expect(page).toHaveURL(/\/upload$/);
@@ -95,16 +97,19 @@ test.describe('Requested upload scenarios', () => {
   // The test confirms the app accepts several files together and shows each selected filename in the success flow.
   test('TC-02: upload 5 files in one file-picker submission', async ({ uploadPage, sampleFiles }) => {
     attachMeta('P0', 'major');
+    await uploadPage.showSubtitle('TC-02: Checking whether the file input supports multiple files.');
     const supportsMultiple = await uploadPage.fileInput.evaluate((input) => input.multiple);
     expect(supportsMultiple, 'The application file input does not support multiple selection.').toBeTruthy();
 
     const files = getTestFiles(sampleFiles, 5);
+    await uploadPage.showSubtitle('TC-02: Selecting five sample files for one submission.');
     await uploadPage.fileInput.setInputFiles(files.map(({ name, mimeType, path: filePath }) => ({
       name,
       mimeType,
       buffer: fs.readFileSync(filePath),
     })));
     const response = await uploadPage.submitAndWait();
+    await uploadPage.showSubtitle('TC-02: Verifying the response and all five uploaded filenames.');
     expect(response.status()).toBeGreaterThanOrEqual(200);
     expect(response.status()).toBeLessThan(300);
     await expect(uploadPage.successHeading).toBeVisible();
@@ -117,7 +122,7 @@ test.describe('Requested upload scenarios', () => {
   // This block intercepts the network call, checks the file previews, and validates the exact filenames sent to /upload.
   test('TC-03: drag and drop 3 files into the drop zone', async ({ page, uploadPage, sampleFiles }, testInfo) => {
     attachMeta('P0', 'major');
-    // const dropZone = page.locator('#drag-drop-upload');
+    await uploadPage.showSubtitle('TC-03: Checking that the drop zone is visible.');
     await expect(uploadPage.dropZone).toBeVisible();
     testInfo.annotations.push({
       type: 'network',
@@ -126,8 +131,10 @@ test.describe('Requested upload scenarios', () => {
 
     const files = getTestFiles(sampleFiles, 3);
     const requestBodies = await mockUploadRequests(page);
+    await uploadPage.showSubtitle('TC-03: Dropping three files; upload requests are intercepted locally.');
     await dropFiles(uploadPage, files);
 
+    await uploadPage.showSubtitle('TC-03: Verifying drop previews, filenames, and intercepted requests.');
     const previews = uploadPage.dropZone.locator('.dz-preview');
     await expect(previews).toHaveCount(files.length);
     await expect(uploadPage.dropZone.locator('.dz-success')).toHaveCount(files.length);
@@ -144,16 +151,20 @@ test.describe('Requested upload scenarios', () => {
   test('TC-04: remove selected files from a multi-file drop before upload', async ({ page, uploadPage, sampleFiles }) => {
     attachMeta('P1', 'major');
     const dropZone = page.locator('#drag-drop-upload');
+    await uploadPage.showSubtitle('TC-04: Checking the drop zone before selecting files.');
     await expect(dropZone).toBeVisible();
 
     const files = getTestFiles(sampleFiles, 5);
+    await uploadPage.showSubtitle('TC-04: Dropping five sample files into the drop zone.');
     await dropFiles(uploadPage, files);
     const previews = dropZone.locator('.dz-preview');
+    await uploadPage.showSubtitle('TC-04: Confirming five previews, then removing two files.');
     await expect(previews).toHaveCount(files.length);
     const removeButtons = dropZone.locator('.dz-remove');
     for (const index of [0, 1]) {
       await removeButtons.nth(index).click();
     }
+    await uploadPage.showSubtitle('TC-04: Verifying that three file previews remain.');
     await expect(previews).toHaveCount(3);
   });
 });
